@@ -111,6 +111,7 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="DagNode.h" />
+    <ClInclude Include="Importer.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="SimpleRenderer.h" />
@@ -121,6 +122,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="DagNode.cpp" />
+    <ClCompile Include="Importer.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="SimpleRenderer.cpp" />

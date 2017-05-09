@@ -34,6 +34,7 @@
     <ClCompile Include="DagNode.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Importer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -44,6 +45,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="Importer.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">

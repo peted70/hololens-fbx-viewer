@@ -8,6 +8,21 @@ Mesh::Mesh()
 
 Mesh::~Mesh()
 {
+	if (_vertexPositionBuffer != 0)
+	{
+		glDeleteBuffers(1, &_vertexPositionBuffer);
+		_vertexPositionBuffer = 0;
+	}
+	if (_vertexColorBuffer != 0)
+	{
+		glDeleteBuffers(1, &_vertexColorBuffer);
+		_vertexColorBuffer = 0;
+	}
+	if (_normalsBuffer != 0)
+	{
+		glDeleteBuffers(1, &_normalsBuffer);
+		_normalsBuffer = 0;
+	}
 }
 
 void Mesh::SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices)

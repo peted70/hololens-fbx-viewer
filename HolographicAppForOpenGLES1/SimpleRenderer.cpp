@@ -16,35 +16,12 @@
 #include "fbxsdk\utils\fbxgeometryconverter.h"
 #include "Model.h"
 #include "utils.h"
+#include "Importer.h"
 
 using namespace Platform;
 using namespace HolographicAppForOpenGLES1;
 
 #define STRING(s) #s
-
-class Vector3
-{
-public:
-	Vector3(): x(0), y(0), z(0) {}
-	Vector3(float xin, float yin, float zin) : x(xin), y(yin), z(zin) {}
-	Vector3(const Vector3& other)
-	{
-		x = other.x;
-		y = other.y;
-		z = other.z;
-	}
-	Vector3& operator=(const Vector3& other)
-	{
-		x = other.x;
-		y = other.y;
-		z = other.z;
-		return *this;
-	}
-
-	float x;
-	float y;
-	float z;
-};
 
 GLuint CompileShader(GLenum type, const std::string &source)
 {
@@ -122,171 +99,6 @@ GLuint CompileProgram(const std::string &vsSource, const std::string &fsSource)
     return program;
 }
 
-static Vector3 ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter)
-{
-	Vector3 outNormal;
-	if (inMesh->GetElementNormalCount() < 1)
-	{
-		throw std::exception("Invalid Normal Number");
-	}
-
-	FbxGeometryElementNormal* vertexNormal = inMesh->GetElementNormal(0);
-	switch (vertexNormal->GetMappingMode())
-	{
-	case FbxGeometryElement::eByControlPoint:
-		switch (vertexNormal->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[2]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexNormal->GetIndexArray().GetAt(inCtrlPointIndex);
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-
-	case FbxGeometryElement::eByPolygonVertex:
-		switch (vertexNormal->GetReferenceMode())
-		{
-		case FbxGeometryElement::eDirect:
-		{
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[2]);
-		}
-		break;
-
-		case FbxGeometryElement::eIndexToDirect:
-		{
-			int index = vertexNormal->GetIndexArray().GetAt(inVertexCounter);
-			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
-			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
-			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
-		}
-		break;
-
-		default:
-			throw std::exception("Invalid Reference");
-		}
-		break;
-	}
-	return outNormal;
-}
-
-/* Tab character ("\t") counter */
-int numTabs = 0;
-
-/**
-* Print the required number of tabs.
-*/
-void PrintTabs() 
-{
-	for (int i = 0; i < numTabs; i++)
-		DebugLog(L"\t");
-}
-
-/**
-* Return a string-based representation based on the attribute type.
-*/
-FbxString GetAttributeTypeName(FbxNodeAttribute::EType type) 
-{
-	switch (type) 
-	{
-	case FbxNodeAttribute::eUnknown: return "unidentified";
-	case FbxNodeAttribute::eNull: return "null";
-	case FbxNodeAttribute::eMarker: return "marker";
-	case FbxNodeAttribute::eSkeleton: return "skeleton";
-	case FbxNodeAttribute::eMesh: return "mesh";
-	case FbxNodeAttribute::eNurbs: return "nurbs";
-	case FbxNodeAttribute::ePatch: return "patch";
-	case FbxNodeAttribute::eCamera: return "camera";
-	case FbxNodeAttribute::eCameraStereo: return "stereo";
-	case FbxNodeAttribute::eCameraSwitcher: return "camera switcher";
-	case FbxNodeAttribute::eLight: return "light";
-	case FbxNodeAttribute::eOpticalReference: return "optical reference";
-	case FbxNodeAttribute::eOpticalMarker: return "marker";
-	case FbxNodeAttribute::eNurbsCurve: return "nurbs curve";
-	case FbxNodeAttribute::eTrimNurbsSurface: return "trim nurbs surface";
-	case FbxNodeAttribute::eBoundary: return "boundary";
-	case FbxNodeAttribute::eNurbsSurface: return "nurbs surface";
-	case FbxNodeAttribute::eShape: return "shape";
-	case FbxNodeAttribute::eLODGroup: return "lodgroup";
-	case FbxNodeAttribute::eSubDiv: return "subdiv";
-	default: return "unknown";
-	}
-}
-
-void PrintAttribute(FbxNodeAttribute* pAttribute) 
-{
-	if (!pAttribute) return;
-
-	FbxString typeName = GetAttributeTypeName(pAttribute->GetAttributeType());
-	FbxString attrName = pAttribute->GetName();
-	PrintTabs();
-	// Note: to retrieve the character array of a FbxString, use its Buffer() method.
-	DebugLog(L"<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
-}
-
-void PrintNode(FbxNode* pNode) 
-{
-	PrintTabs();
-	const char* nodeName = pNode->GetName();
-	FbxDouble3 translation = pNode->LclTranslation.Get();
-	FbxDouble3 rotation = pNode->LclRotation.Get();
-	FbxDouble3 scaling = pNode->LclScaling.Get();
-
-	// Print the contents of the node.
-	DebugLog(L"<node name='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
-		nodeName,
-		translation[0], translation[1], translation[2],
-		rotation[0], rotation[1], rotation[2],
-		scaling[0], scaling[1], scaling[2]
-	);
-	numTabs++;
-
-	// Print the node's attributes.
-	for (int i = 0; i < pNode->GetNodeAttributeCount(); i++)
-		PrintAttribute(pNode->GetNodeAttributeByIndex(i));
-
-	// Recursively print the children.
-	for (int j = 0; j < pNode->GetChildCount(); j++)
-		PrintNode(pNode->GetChild(j));
-
-	numTabs--;
-	PrintTabs();
-	DebugLog(L"</node>\n");
-}
-
-void TraverseScene(FbxNode *node, std::function<void(FbxMesh *)> callback)
-{
-	if (node == nullptr)
-		return;
-
-	FbxMesh* mesh = node->GetMesh();
-	if (mesh != nullptr)
-	{
-		callback(mesh);
-	}
-
-	for (int i = 0; i < node->GetChildCount(); i++)
-	{
-		TraverseScene(node->GetChild(i), callback);
-	}
-}
-
 SimpleRenderer::SimpleRenderer(bool isHolographic) :
     mWindowWidth(1268),
     mWindowHeight(720),
@@ -359,102 +171,13 @@ SimpleRenderer::SimpleRenderer(bool isHolographic) :
     mViewUniformLocation = glGetUniformLocation(mProgram, "uViewMatrix");
     mProjUniformLocation = glGetUniformLocation(mProgram, "uProjMatrix");
 
-	_model = std::make_unique<Model>();
-
-	_model->SetPositionAttribLocation(mPositionAttribLocation);
-	_model->SetColorAttribLocation(mColorAttribLocation);
-
 	const char *filename = "./Assets/hlscaled.fbx";
-	FbxManager *sdkManager = FbxManager::Create();
-
-	FbxIOSettings *settings = FbxIOSettings::Create(sdkManager, IOSROOT);
-
-	FbxImporter* lImporter = FbxImporter::Create(sdkManager, "");
-
-	// Use the first argument as the filename for the importer.
-	if (!lImporter->Initialize(filename, -1, sdkManager->GetIOSettings()))
-	{
-	}
-
-	// Create a new scene so that it can be populated by the imported file.
-	FbxScene* lScene = FbxScene::Create(sdkManager, "myScene");
-
-	// Import the contents of the file into the scene.
-	lImporter->Import(lScene);
-
-	// The file is imported, so get rid of the importer.
-	lImporter->Destroy();
-
-	// Print the nodes of the scene and their attributes recursively.
-	// Note that we are not printing the root node because it should
-	// not contain any attributes.
-	FbxNode* lRootNode = lScene->GetRootNode();
-
-	if (lRootNode)
-	{
-		for (int i = 0; i < lRootNode->GetChildCount(); i++)
-			PrintNode(lRootNode->GetChild(i));
-
-		FbxGeometryConverter clsConverter(sdkManager);
-		clsConverter.Triangulate(lScene, false);
-
-		// Create A Model type, pass it in here and fill it in...
-		TraverseScene(lRootNode, [this, &sdkManager](FbxMesh *fbxMesh)
-		{
-			// Get vertices from the mesh
-			int numVertices = fbxMesh->GetControlPointsCount();
-			auto verts = make_unique<GLfloat[]>(numVertices * 4);
-			auto mesh = make_shared<Mesh>();
-			auto normals = make_unique<GLfloat[]>(numVertices * 3);
-			for (int j = 0; j < numVertices; j++)
-			{
-				FbxVector4 coord = fbxMesh->GetControlPointAt(j);
-
-				verts.get()[j * 4 + 0] = (GLfloat)coord.mData[0];
-				verts.get()[j * 4 + 1] = (GLfloat)coord.mData[1];
-				verts.get()[j * 4 + 2] = (GLfloat)coord.mData[2];
-				verts.get()[j * 4 + 3] = 1.0f;
-
-				DebugLog(L"Vertex %d - {%f %f %f}", j, (GLfloat)coord.mData[0],
-					(GLfloat)coord.mData[1], (GLfloat)coord.mData[2]);
-
-				Vector3 ret = ReadNormal(fbxMesh, j, j);
-				normals.get()[j * 3 + 0] = ret.x;
-				normals.get()[j * 3 + 1] = ret.y;
-				normals.get()[j * 3 + 2] = ret.z;
-
-				DebugLog(L"Normal %d - {%f %f %f}", j, ret.x, ret.y, ret.z);
-			}
-
-			// Transfer ownership to the model..
-			mesh->SetVertices(std::move(verts), numVertices);
-			mesh->SetNormals(std::move(normals), numVertices);
-			int numIndices = fbxMesh->GetPolygonVertexCount();
-			int* indices = fbxMesh->GetPolygonVertices();
-
-			auto isMesh = fbxMesh->IsTriangleMesh();
-			auto count = fbxMesh->GetPolygonCount();
-			
-			auto idxes = make_unique<unsigned short[]>(numIndices);
-			for (int j = 0; j < numIndices; j++)
-			{
-				idxes[j] = indices[j];
-			}
-
-			for (int j = 0; j < numIndices; j++)
-			{
-				DebugLog(L"Index %d - {%d}", j, idxes[j]);
-			}
-
-			mesh->SetIndexBuffer(std::move(idxes), numIndices);
-			_model->AddMesh(mesh);
-		});
-
-		_model->Loaded();
-	}
-
-	// Destroy the SDK manager and all the other objects it was handling.
-	sdkManager->Destroy();
+	auto importer = make_unique<Importer>();
+	
+	// These will ultimtely belong to the model but for now everything is sharing
+	// the same shaders so just pass in..
+	importer->SetShaderAttributes(mPositionAttribLocation, mColorAttribLocation);
+	_model = importer->LoadModelFromFile(filename);
 
     float renderTargetArrayIndices[] = { 0.f, 1.f };
     glGenBuffers(1, &mRenderTargetArrayIndices);
@@ -549,3 +272,4 @@ void SimpleRenderer::UpdateWindowSize(GLsizei width, GLsizei height)
         mWindowHeight = height;
     }
 }
+

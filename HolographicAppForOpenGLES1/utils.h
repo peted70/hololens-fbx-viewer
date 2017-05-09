@@ -4,6 +4,30 @@
 #include <strsafe.h>
 #include <string>
 
+class Vector3
+{
+public:
+	Vector3() : x(0), y(0), z(0) {}
+	Vector3(float xin, float yin, float zin) : x(xin), y(yin), z(zin) {}
+	Vector3(const Vector3& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+	}
+	Vector3& operator=(const Vector3& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+		return *this;
+	}
+
+	float x;
+	float y;
+	float z;
+};
+
 static void DebugLog(_In_z_ LPCWSTR format, ...)
 {
 	wchar_t buffer[1024];
