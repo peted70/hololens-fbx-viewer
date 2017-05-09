@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Assets">
+      <UniqueIdentifier>5f8bf296-7324-4a62-9672-a7437f25ee8f</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="Binaries">
+      <Extensions>dll;</Extensions>
+    </Filter>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="SimpleRenderer.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="DagNode.cpp" />
+    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Mesh.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="SimpleRenderer.h" />
+    <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="DagNode.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="Mesh.h" />
+    <ClInclude Include="utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="HolographicAppForOpenGLES1_TemporaryKey.pfx" />
+    <None Include="$(AngleBinPath)libEGL.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="$(AngleBinPath)libGLESv2.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="..\..\..\..\..\3D Models\hlmodel.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\..\..\..\..\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\lib\vs2015store\x86\debug\libfbxsdk.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="..\..\..\..\..\3D Models\cube.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\..\3D Models\stanford-bunny.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\..\3D Models\cube1.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="..\..\..\..\..\3D Models\monkey.fbx">
+      <Filter>Assets</Filter>
+    </None>
+  </ItemGroup>
+</Project>
