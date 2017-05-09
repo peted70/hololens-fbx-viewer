@@ -9,9 +9,7 @@ public:
 	~Mesh();
 
 	void SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices);
-	void SetVertices2(GLfloat *vertices, int numVertices);
 	void SetIndexBuffer(unique_ptr<unsigned short[]> indices, int numIndices);
-	void SetIndexBuffer2(unsigned short *indices, int numIndices);
 	void SetPositionAttribLocation(GLint positionAttribLocation);
 	void SetColorAttribLocation(GLint colorAttribLocation);
 	void Render(bool isHolographic);

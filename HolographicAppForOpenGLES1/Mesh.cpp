@@ -37,31 +37,6 @@ void Mesh::SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices)
 	checkGlError(L"SetVertices");
 }
 
-void Mesh::SetVertices2(GLfloat *vertices, int numVertices)
-{
-	vertices2 = vertices;
-	glGenBuffers(1, &_vertexPositionBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * numVertices, vertices2, GL_STATIC_DRAW);
-
-	auto vertColours = make_unique<GLfloat[]>(numVertices * 4);
-
-	// just generate some vertex colours for time being...
-	for (int i = 0; i < numVertices * 4; i += 4)
-	{
-		vertColours[i] = 1.0f;
-		vertColours[i + 1] = 0.0f;
-		vertColours[i + 2] = 0.0f;
-		vertColours[i + 3] = 1.0f;
-	}
-
-	glGenBuffers(1, &_vertexColorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * numVertices, vertColours.get(), GL_STATIC_DRAW);
-
-	checkGlError(L"SetVertices");
-}
-
 void Mesh::SetIndexBuffer(unique_ptr<unsigned short[]> indices, int numIndices)
 {
 	_numIndices = numIndices;
@@ -71,17 +46,6 @@ void Mesh::SetIndexBuffer(unique_ptr<unsigned short[]> indices, int numIndices)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_vbo);
 	auto ind = _vertex_indices.get();
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * numIndices, _vertex_indices.get(), GL_STATIC_DRAW);
-	checkGlError(L"SetIndexBuffer");
-}
-
-void Mesh::SetIndexBuffer2(unsigned short *indices, int numIndices)
-{
-	_numIndices = numIndices;
-	//_vertex_indices = std::move(indices);
-
-	glGenBuffers(1, &_index_vbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_vbo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned short) * numIndices, indices, GL_STATIC_DRAW);
 	checkGlError(L"SetIndexBuffer");
 }
 
@@ -97,6 +61,8 @@ void Mesh::SetColorAttribLocation(GLint colorAttribLocation)
 
 void Mesh::Render(bool isHolographic)
 {
+	PreRender(isHolographic);
+
 	//glDisable(GL_TEXTURE_2D);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_vbo);
 	checkGlError(L"glBindBuffer");

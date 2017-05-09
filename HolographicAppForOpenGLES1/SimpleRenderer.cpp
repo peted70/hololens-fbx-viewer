@@ -276,7 +276,7 @@ SimpleRenderer::SimpleRenderer(bool isHolographic) :
 	_model->SetPositionAttribLocation(mPositionAttribLocation);
 	_model->SetColorAttribLocation(mColorAttribLocation);
 
-	const char *filename = "monkey.fbx";
+	const char *filename = "./Assets/hlscaled.fbx";
 	FbxManager *sdkManager = FbxManager::Create();
 
 	FbxIOSettings *settings = FbxIOSettings::Create(sdkManager, IOSROOT);
@@ -414,8 +414,6 @@ void SimpleRenderer::Draw()
         return;
 
     glUseProgram(mProgram);
-
-	_model->PreRender(mIsHolographic);
 
     MathHelper::Vec3 position = MathHelper::Vec3(0.f, 0.f, -10.f);
     MathHelper::Matrix4 modelMatrix = MathHelper::SimpleModelMatrix((float)mDrawCount / 50.0f, position);

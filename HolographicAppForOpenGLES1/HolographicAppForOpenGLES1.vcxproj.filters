@@ -61,22 +61,28 @@
     <None Include="$(AngleBinPath)libGLESv2.dll">
       <Filter>Binaries</Filter>
     </None>
-    <None Include="..\..\..\..\..\3D Models\hlmodel.fbx">
-      <Filter>Assets</Filter>
-    </None>
     <None Include="..\..\..\..\..\..\..\..\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\lib\vs2015store\x86\debug\libfbxsdk.dll">
       <Filter>Binaries</Filter>
     </None>
-    <None Include="..\..\..\..\..\3D Models\cube.fbx">
+    <None Include="Assets\monkey.fbx">
       <Filter>Assets</Filter>
     </None>
-    <None Include="..\..\..\..\..\3D Models\stanford-bunny.fbx">
+    <None Include="Assets\stanford-bunny.fbx">
       <Filter>Assets</Filter>
     </None>
-    <None Include="..\..\..\..\..\3D Models\cube1.fbx">
+    <None Include="Assets\cube.fbx">
       <Filter>Assets</Filter>
     </None>
-    <None Include="..\..\..\..\..\3D Models\monkey.fbx">
+    <None Include="Assets\cube1.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\cubegroup.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\hlmodel.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\hlscaled.fbx">
       <Filter>Assets</Filter>
     </None>
   </ItemGroup>
