@@ -37,6 +37,14 @@ void Mesh::SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices)
 	checkGlError(L"SetVertices");
 }
 
+void Mesh::SetNormals(unique_ptr<GLfloat[]> normals, int numVertices)
+{
+	_normals = std::move(normals);
+	glGenBuffers(1, &_normalsBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _normalsBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * numVertices, _normals.get(), GL_STATIC_DRAW);
+}
+
 void Mesh::SetIndexBuffer(unique_ptr<unsigned short[]> indices, int numIndices)
 {
 	_numIndices = numIndices;

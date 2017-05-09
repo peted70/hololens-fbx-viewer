@@ -22,6 +22,30 @@ using namespace HolographicAppForOpenGLES1;
 
 #define STRING(s) #s
 
+class Vector3
+{
+public:
+	Vector3(): x(0), y(0), z(0) {}
+	Vector3(float xin, float yin, float zin) : x(xin), y(yin), z(zin) {}
+	Vector3(const Vector3& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+	}
+	Vector3& operator=(const Vector3& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+		return *this;
+	}
+
+	float x;
+	float y;
+	float z;
+};
+
 GLuint CompileShader(GLenum type, const std::string &source)
 {
     GLuint shader = glCreateShader(type);
@@ -96,6 +120,70 @@ GLuint CompileProgram(const std::string &vsSource, const std::string &fsSource)
     }
 
     return program;
+}
+
+static Vector3 ReadNormal(FbxMesh* inMesh, int inCtrlPointIndex, int inVertexCounter)
+{
+	Vector3 outNormal;
+	if (inMesh->GetElementNormalCount() < 1)
+	{
+		throw std::exception("Invalid Normal Number");
+	}
+
+	FbxGeometryElementNormal* vertexNormal = inMesh->GetElementNormal(0);
+	switch (vertexNormal->GetMappingMode())
+	{
+	case FbxGeometryElement::eByControlPoint:
+		switch (vertexNormal->GetReferenceMode())
+		{
+		case FbxGeometryElement::eDirect:
+		{
+			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[0]);
+			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[1]);
+			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inCtrlPointIndex).mData[2]);
+		}
+		break;
+
+		case FbxGeometryElement::eIndexToDirect:
+		{
+			int index = vertexNormal->GetIndexArray().GetAt(inCtrlPointIndex);
+			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
+			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
+			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
+		}
+		break;
+
+		default:
+			throw std::exception("Invalid Reference");
+		}
+		break;
+
+	case FbxGeometryElement::eByPolygonVertex:
+		switch (vertexNormal->GetReferenceMode())
+		{
+		case FbxGeometryElement::eDirect:
+		{
+			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[0]);
+			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[1]);
+			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(inVertexCounter).mData[2]);
+		}
+		break;
+
+		case FbxGeometryElement::eIndexToDirect:
+		{
+			int index = vertexNormal->GetIndexArray().GetAt(inVertexCounter);
+			outNormal.x = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[0]);
+			outNormal.y = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[1]);
+			outNormal.z = static_cast<float>(vertexNormal->GetDirectArray().GetAt(index).mData[2]);
+		}
+		break;
+
+		default:
+			throw std::exception("Invalid Reference");
+		}
+		break;
+	}
+	return outNormal;
 }
 
 /* Tab character ("\t") counter */
@@ -317,7 +405,7 @@ SimpleRenderer::SimpleRenderer(bool isHolographic) :
 			int numVertices = fbxMesh->GetControlPointsCount();
 			auto verts = make_unique<GLfloat[]>(numVertices * 4);
 			auto mesh = make_shared<Mesh>();
-
+			auto normals = make_unique<GLfloat[]>(numVertices * 3);
 			for (int j = 0; j < numVertices; j++)
 			{
 				FbxVector4 coord = fbxMesh->GetControlPointAt(j);
@@ -329,11 +417,18 @@ SimpleRenderer::SimpleRenderer(bool isHolographic) :
 
 				DebugLog(L"Vertex %d - {%f %f %f}", j, (GLfloat)coord.mData[0],
 					(GLfloat)coord.mData[1], (GLfloat)coord.mData[2]);
+
+				Vector3 ret = ReadNormal(fbxMesh, j, j);
+				normals.get()[j * 3 + 0] = ret.x;
+				normals.get()[j * 3 + 1] = ret.y;
+				normals.get()[j * 3 + 2] = ret.z;
+
+				DebugLog(L"Normal %d - {%f %f %f}", j, ret.x, ret.y, ret.z);
 			}
 
 			// Transfer ownership to the model..
 			mesh->SetVertices(std::move(verts), numVertices);
-
+			mesh->SetNormals(std::move(normals), numVertices);
 			int numIndices = fbxMesh->GetPolygonVertexCount();
 			int* indices = fbxMesh->GetPolygonVertices();
 
