@@ -3,6 +3,28 @@
 #include <fbxsdk.h>
 #include "utils.h"
 #include "Model.h"
+#include <iterator>
+
+static wchar_t* currentwidecharbuffer = nullptr;
+static int wcharcurrentsize = 0;
+
+const wchar_t *CH_TO_WCH(const char *original)
+{
+	size_t size = strlen(original) + 1;
+
+	// Just leak a fixed amount..
+	if (size > wcharcurrentsize)
+	{
+		wcharcurrentsize = size;
+		currentwidecharbuffer = (wchar_t *)realloc(currentwidecharbuffer, 
+			wcharcurrentsize * sizeof(wchar_t));
+	}
+
+	size_t outSize;
+	mbstowcs_s(&outSize, currentwidecharbuffer, size, original, size - 1);
+
+	return currentwidecharbuffer;
+}
 
 Importer::Importer()
 {
@@ -43,14 +65,7 @@ unique_ptr<Model> Importer::LoadModelFromFile(const char *filename)
 	// Create A Model type, pass it in here and fill it in...
 	TraverseScene(rootNode, [this, &model](FbxMesh *fbxMesh)
 	{
-		int materials = fbxMesh->GetElementMaterialCount();
-		DebugLog(L"Number of materials = %d", materials);
-
-		for (int i = 0; i < materials; i++)
-		{
-			auto mat = fbxMesh->GetElementMaterial(i);
-			//mat->
-		}
+		DisplayMaterial(fbxMesh);
 
 		// Get vertices from the mesh
 		int numVertices = fbxMesh->GetControlPointsCount();
@@ -227,8 +242,8 @@ void Importer::PrintNode(FbxNode* pNode)
 	FbxDouble3 scaling = pNode->LclScaling.Get();
 
 	// Print the contents of the node.
-	DebugLog(L"<node name='%s' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
-		nodeName,
+	DebugLog(L"<node name='%S' translation='(%f, %f, %f)' rotation='(%f, %f, %f)' scaling='(%f, %f, %f)'>\n",
+		CH_TO_WCH(nodeName),
 		translation[0], translation[1], translation[2],
 		rotation[0], rotation[1], rotation[2],
 		scaling[0], scaling[1], scaling[2]
@@ -296,7 +311,7 @@ void Importer::PrintAttribute(FbxNodeAttribute* pAttribute)
 	FbxString attrName = pAttribute->GetName();
 	PrintTabs();
 	// Note: to retrieve the character array of a FbxString, use its Buffer() method.
-	DebugLog(L"<attribute type='%s' name='%s'/>\n", typeName.Buffer(), attrName.Buffer());
+	DebugLog(L"<attribute type='%S' name='%S'/>\n", CH_TO_WCH(typeName.Buffer()), CH_TO_WCH(attrName.Buffer()));
 }
 
 void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
@@ -321,7 +336,7 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 
 			FbxSurfaceMaterial *lMaterial = lNode->GetMaterial(lCount);
 
-			DebugLog(L"Name: %s", (char *)lMaterial->GetName());
+			DebugLog(L"Name: %S", CH_TO_WCH((char *)lMaterial->GetName()));
 
 			//Get the implementation to see if it's a hardware shader.
 			const FbxImplementation* lImplementation = GetImplementation(lMaterial, FBXSDK_IMPLEMENTATION_HLSL);
@@ -334,7 +349,7 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 			if (lImplementation)
 			{
 				//Now we have a hardware shader, let's read it
-				DebugLog(L"Hardware Shader Type: %s\n", lImplemenationType.Buffer());
+				DebugLog(L"Hardware Shader Type: %S\n", CH_TO_WCH(lImplemenationType.Buffer()));
 				const FbxBindingTable* lRootTable = lImplementation->GetRootTable();
 				FbxString lFileName = lRootTable->DescAbsoluteURL.Get();
 				FbxString lTechniqueName = lRootTable->DescTAG.Get();
@@ -351,7 +366,7 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 
 
 					FbxString lTest = lEntry.GetSource();
-					DebugLog(L"Entry: %s\n", lTest.Buffer());
+					DebugLog(L"Entry: %S\n", CH_TO_WCH(lTest.Buffer()));
 
 
 					if (strcmp(FbxPropertyEntryView::sEntryType, lEntrySrcType) == 0)
@@ -376,17 +391,17 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 							for (int j = 0; j<lFbxProp.GetSrcObjectCount<FbxFileTexture>(); ++j)
 							{
 								FbxFileTexture *lTex = lFbxProp.GetSrcObject<FbxFileTexture>(j);
-								DebugLog(L"File Texture: %s\n", lTex->GetFileName());
+								DebugLog(L"File Texture: %S\n", CH_TO_WCH(lTex->GetFileName()));
 							}
 							for (int j = 0; j<lFbxProp.GetSrcObjectCount<FbxLayeredTexture>(); ++j)
 							{
 								FbxLayeredTexture *lTex = lFbxProp.GetSrcObject<FbxLayeredTexture>(j);
-								DebugLog(L"Layered Texture: %s\n", lTex->GetName());
+								DebugLog(L"Layered Texture: %S\n", CH_TO_WCH(lTex->GetName()));
 							}
 							for (int j = 0; j<lFbxProp.GetSrcObjectCount<FbxProceduralTexture>(); ++j)
 							{
 								FbxProceduralTexture *lTex = lFbxProp.GetSrcObject<FbxProceduralTexture>(j);
-								DebugLog(L"Procedural Texture: %s\n", lTex->GetName());
+								DebugLog(L"Procedural Texture: %Sn", CH_TO_WCH(lTex->GetName()));
 							}
 						}
 						else
@@ -395,7 +410,7 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 							FbxString blah = lFbxType.GetName();
 							if (FbxBoolDT == lFbxType)
 							{
-								DebugLog(L"                Bool: %s", lFbxProp.Get<FbxBool>() ? L"YES" : L"NO");
+								DebugLog(L"                Bool: %S", lFbxProp.Get<FbxBool>() ? L"YES" : L"NO");
 							}
 							else if (FbxIntDT == lFbxType || FbxEnumDT == lFbxType)
 							{
@@ -414,7 +429,7 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 								|| FbxUrlDT == lFbxType
 								|| FbxXRefUrlDT == lFbxType)
 							{
-								DebugLog(L"                String: %s", lFbxProp.Get<FbxString>().Buffer());
+								DebugLog(L"                String: %S", CH_TO_WCH(lFbxProp.Get<FbxString>().Buffer()));
 							}
 							else if (FbxDouble2DT == lFbxType)
 							{
@@ -530,7 +545,9 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 
 			FbxPropertyT<FbxString> lString;
 			lString = lMaterial->ShadingModel;
-			DebugLog(L"            Shading Model: %s", lString.Get().Buffer());
+			char *intext = lString.Get().Buffer();
+			wchar_t *conv = const_cast<wchar_t *>(CH_TO_WCH(intext));
+			DebugLog(L"            Shading Model: %S", conv);
 			DebugLog(L"");
 		}
 	}
