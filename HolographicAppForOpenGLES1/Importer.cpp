@@ -174,9 +174,11 @@ unique_ptr<Model> Importer::LoadModelFromFile(const char *filename)
 
 		auto colors = make_unique<GLfloat[]>(numVertices*4);
 
-		// Look up the materials diffues colours, and...
+		// Look up the materials diffuse colours, and...
 		for (int i = 0; i < numVertices; i++)
 		{
+			// The triangle mapping has been stored by looping over each triangle
+			// and querying it's material and storing the indices..
 			int matIdx = triangleMapping[i];
 			auto mt = node->GetMaterial(matIdx);
 			FbxProperty prop = mt->FindProperty(FbxSurfaceMaterial::sDiffuse);
