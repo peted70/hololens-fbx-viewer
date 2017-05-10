@@ -16,6 +16,7 @@ public:
 	~Importer();
 
 	unique_ptr<Model> LoadModelFromFile(const char * filename);
+	void ConnectMaterialToMesh(FbxMesh * pMesh, int triangleCount, int * pTriangleMtlIndex);
 	void SetShaderAttributes(GLuint positionAttribLocation, GLuint colorAttribLocation);
 
 protected:

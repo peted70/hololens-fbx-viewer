@@ -25,6 +25,13 @@ Mesh::~Mesh()
 	}
 }
 
+void Mesh::SetVertexColors(unique_ptr<GLfloat[]> colors, int numVertices)
+{
+	glGenBuffers(1, &_vertexColorBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * numVertices, colors.get(), GL_STATIC_DRAW);
+}
+
 void Mesh::SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices)
 {
 	// assume ownership of the verices passed in..
@@ -33,21 +40,6 @@ void Mesh::SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices)
 	glGenBuffers(1, &_vertexPositionBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * numVertices, _vertices.get(), GL_STATIC_DRAW);
-
-	auto vertColours = make_unique<GLfloat[]>(numVertices*4);
-
-	// just generate some vertex colours for time being...
-	for (int i = 0; i < numVertices * 4; i+=4)
-	{
-		vertColours[i] = 1.0f;
-		vertColours[i+1] = 0.0f;
-		vertColours[i+2] = 0.0f;
-		vertColours[i+3] = 1.0f;
-	}
-
-	glGenBuffers(1, &_vertexColorBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * numVertices, vertColours.get(), GL_STATIC_DRAW);
 
 	checkGlError(L"SetVertices");
 }

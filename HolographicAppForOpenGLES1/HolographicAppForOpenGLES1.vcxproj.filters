@@ -35,6 +35,9 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Importer.cpp" />
+    <ClCompile Include="Material.cpp" />
+    <ClCompile Include="Colour.cpp" />
+    <ClCompile Include="PhongMaterial.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -46,6 +49,9 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Importer.h" />
+    <ClInclude Include="Material.h" />
+    <ClInclude Include="Colour.h" />
+    <ClInclude Include="PhongMaterial.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
@@ -85,6 +91,9 @@
       <Filter>Assets</Filter>
     </None>
     <None Include="Assets\hlscaled.fbx">
+      <Filter>Assets</Filter>
+    </None>
+    <None Include="Assets\colorcube.fbx">
       <Filter>Assets</Filter>
     </None>
   </ItemGroup>

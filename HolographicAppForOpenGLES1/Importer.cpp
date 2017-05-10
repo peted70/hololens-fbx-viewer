@@ -66,6 +66,52 @@ unique_ptr<Model> Importer::LoadModelFromFile(const char *filename)
 	TraverseScene(rootNode, [this, &model](FbxMesh *fbxMesh)
 	{
 		DisplayMaterial(fbxMesh);
+		
+		//auto node = fbxMesh->GetNode();
+		//int numMats = node->GetMaterialCount();
+		//for (int i = 0; i < numMats; i++)
+		//{
+		//	auto mt = node->GetMaterial(i);
+		//	FbxProperty prop = mt->FindProperty(FbxSurfaceMaterial::sDiffuse);
+		//	if (prop.IsValid())
+		//	{
+		//		auto lKFbxDouble3 = ((FbxSurfacePhong *)mt)->Diffuse;
+		//	}
+		//}
+		// Not sure yet if we are supplied with a mesh per material or what
+		// leave this code here for now in case we need to work this out..
+		const int polygonCount = fbxMesh->GetPolygonCount();
+		int numMaterials = fbxMesh->GetElementMaterialCount();
+		for (int i = 0; i < numMaterials; i++)
+		{
+			auto material = fbxMesh->GetElementMaterial(i);
+			if (material)
+			{
+				// The following call with cause a problem - crashing the scene
+				// destroy() method - don't know the issue but leave it alone.
+				//auto matIndices = material->GetIndexArray();
+				//auto materialMappingMode = material->GetMappingMode();
+				//material->
+
+				//if (materialMappingMode == FbxGeometryElement::eByPolygon)
+				//{
+				//	//int count = matIndices.GetCount();
+				//	//int y = count;
+				//}
+			}
+
+		}
+		//if (lMesh->GetElementMaterial()) {
+
+		//	lMaterialIndice = &lMesh->GetElementMaterial()->GetIndexArray();
+
+		//	lMaterialMappingMode = lMesh->GetElementMaterial()->GetMappingMode();
+
+		//	if (lMaterialIndice && lMaterialMappingMode == FbxGeometryElement::eByPolygon) {
+
+		//		FBX_ASSERT(lMaterialIndice->GetCount() == lPolygonCount);
+
+		//		if (lMaterialIndice->GetCount() == lPolygonCount) {
 
 		// Get vertices from the mesh
 		int numVertices = fbxMesh->GetControlPointsCount();
@@ -113,11 +159,85 @@ unique_ptr<Model> Importer::LoadModelFromFile(const char *filename)
 		}
 
 		mesh->SetIndexBuffer(std::move(idxes), numIndices);
+
+		// Set the vertex colours...
+		int numTris = fbxMesh->GetPolygonCount();
+		auto triangleMapping = make_unique<int[]>(numVertices);
+		for (int i = 0; i < numVertices; i++)
+		{
+			DebugLog(L"tri %d -> %d", i, triangleMapping[i]);
+		}
+
+		ConnectMaterialToMesh(fbxMesh, numTris, triangleMapping.get());
+
+		auto node = fbxMesh->GetNode();
+
+		auto colors = make_unique<GLfloat[]>(numVertices*4);
+
+		// Look up the materials diffues colours, and...
+		for (int i = 0; i < numVertices; i++)
+		{
+			int matIdx = triangleMapping[i];
+			auto mt = node->GetMaterial(matIdx);
+			FbxProperty prop = mt->FindProperty(FbxSurfaceMaterial::sDiffuse);
+			if (prop.IsValid())
+			{
+				auto diffuse = prop.Get<FbxColor>();
+				colors[4 * i + 0] = diffuse.mRed;
+				colors[4 * i + 1] = diffuse.mGreen;
+				colors[4 * i + 2] = diffuse.mBlue;
+				colors[4 * i + 3] = diffuse.mAlpha;
+			}
+		}
+
+		mesh->SetVertexColors(std::move(colors), numVertices);
 		model->AddMesh(mesh);
 	});
 
 	model->Loaded();
 	return model;
+}
+
+void Importer::ConnectMaterialToMesh(FbxMesh* pMesh, int triangleCount, int* pTriangleMtlIndex)
+{
+	// Get the material index list of current mesh  
+	FbxLayerElementArrayTemplate<int>* pMaterialIndices;
+	FbxGeometryElement::EMappingMode materialMappingMode = FbxGeometryElement::eNone;
+
+	if (pMesh->GetElementMaterial())
+	{
+		pMaterialIndices = &pMesh->GetElementMaterial()->GetIndexArray();
+		materialMappingMode = pMesh->GetElementMaterial()->GetMappingMode();
+		if (pMaterialIndices)
+		{
+			switch (materialMappingMode)
+			{
+			case FbxGeometryElement::eByPolygon:
+				{
+					if (pMaterialIndices->GetCount() == triangleCount)
+					{
+						for (int triangleIndex = 0; triangleIndex < triangleCount; ++triangleIndex)
+						{
+							int materialIndex = pMaterialIndices->GetAt(triangleIndex);
+							pTriangleMtlIndex[triangleIndex] = materialIndex;
+						}
+					}
+				}
+				break;
+
+			case FbxGeometryElement::eAllSame:
+				{
+					int lMaterialIndex = pMaterialIndices->GetAt(0);
+
+					for (int triangleIndex = 0; triangleIndex < triangleCount; ++triangleIndex)
+					{
+						int materialIndex = pMaterialIndices->GetAt(triangleIndex);
+						pTriangleMtlIndex[triangleIndex] = materialIndex;
+					}
+				}
+			}
+		}
+	}
 }
 
 void Importer::SetShaderAttributes(GLuint positionAttribLocation, GLuint colorAttribLocation)
@@ -376,8 +496,6 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 						{
 							lFbxProp = lMaterial->RootProperty.FindHierarchical(lEntry.GetSource());
 						}
-
-
 					}
 					else if (strcmp(FbxConstantEntryView::sEntryType, lEntrySrcType) == 0)
 					{
@@ -443,8 +561,6 @@ void Importer::DisplayMaterial(fbxsdk::FbxGeometry* pGeometry)
 							else if (FbxDouble3DT == lFbxType || FbxColor3DT == lFbxType)
 							{
 								FbxDouble3 lDouble3 = lFbxProp.Get<FbxDouble3>();
-
-
 								FbxVector4 lVect;
 								lVect[0] = lDouble3[0];
 								lVect[1] = lDouble3[1];

@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include "Material.h"
 
 using namespace std;
 
@@ -7,6 +9,8 @@ class Mesh
 public:
 	Mesh();
 	~Mesh();
+
+	void SetVertexColors(unique_ptr<GLfloat[]> colors, int numVertices);
 
 	void SetVertices(unique_ptr<GLfloat[]> vertices, int numVertices);
 	void SetNormals(unique_ptr<GLfloat[]> normals, int numVertices);
@@ -29,5 +33,6 @@ private:
 	unique_ptr<GLfloat[]> _normals;
 	int _numIndices;
 	GLuint _index_vbo;
+	vector<unique_ptr<Material>> _materials;
 };
 
