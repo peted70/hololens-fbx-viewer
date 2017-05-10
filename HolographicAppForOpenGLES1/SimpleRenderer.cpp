@@ -219,7 +219,7 @@ void SimpleRenderer::Draw()
     glEnable(GL_DEPTH_TEST);
 
     // On HoloLens, it is important to clear to transparent.
-    glClearColor(0.0f, 0.f, 1.f, 0.f);
+    glClearColor(0.0f, 0.f, 0.f, 0.f);
 
     // On HoloLens, this will also update the camera buffers (constant and back).
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -233,7 +233,7 @@ void SimpleRenderer::Draw()
 
     glUseProgram(mProgram);
 
-    MathHelper::Vec3 position = MathHelper::Vec3(0.f, 0.f, -10.f);
+    MathHelper::Vec3 position = MathHelper::Vec3(0.f, 0.f, -5.f);
     MathHelper::Matrix4 modelMatrix = MathHelper::SimpleModelMatrix((float)mDrawCount / 50.0f, position);
     glUniformMatrix4fv(mModelUniformLocation, 1, GL_FALSE, &(modelMatrix.m[0][0]));
 
