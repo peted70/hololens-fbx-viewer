@@ -69,7 +69,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='Win32'">
     <Link>
-      <AdditionalDependencies>$(AngleBinPath)lib\libGLESv2.lib;$(AngleBinPath)lib\libEGL.lib;mincore.lib;"C:\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\lib\vs2015store\x86\debug\libfbxsdk.lib";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\lib\libGLESv2.lib;.\lib\libEGL.lib;mincore.lib;.\lib\vs2015store\x86\debug\libfbxsdk.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store; $(VCInstallDir)\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -83,7 +83,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(AngleIncPath);$(ProjectDir);"C:\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\include";$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AngleIncPath);$(ProjectDir);$(IntermediateOutputPath);.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
       <PreprocessorDefinitions>_DEBUG;FBXSDK_SHARED;%(PreprocessorDefinitions);FBXSDK_SHARED</PreprocessorDefinitions>
@@ -93,7 +93,7 @@
     <ClCompile>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(AngleIncPath);$(ProjectDir);"C:\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\include";$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(AngleIncPath);$(ProjectDir);$(IntermediateOutputPath);.\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions);FBXSDK_SHARED</PreprocessorDefinitions>
@@ -140,13 +140,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="..\..\..\..\..\..\..\..\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\lib\vs2015store\x86\debug\libfbxsdk.dll">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <FileType>Document</FileType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</DeploymentContent>
-      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
-    </None>
     <None Include="Assets\colorcube.fbx">
       <DeploymentContent>true</DeploymentContent>
     </None>
@@ -181,12 +174,13 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</DeploymentContent>
     </None>
     <None Include="HolographicAppForOpenGLES1_TemporaryKey.pfx" />
-  </ItemGroup>
-  <ItemGroup Label="ANGLE">
-    <None Include="$(AngleBinPath)libEGL.dll">
+    <None Include="libEGL.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
-    <None Include="$(AngleBinPath)libGLESv2.dll">
+    <None Include="libfbxsdk.dll">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="libGLESv2.dll">
       <DeploymentContent>true</DeploymentContent>
     </None>
   </ItemGroup>

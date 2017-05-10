@@ -63,15 +63,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HolographicAppForOpenGLES1_TemporaryKey.pfx" />
-    <None Include="$(AngleBinPath)libEGL.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="$(AngleBinPath)libGLESv2.dll">
-      <Filter>Binaries</Filter>
-    </None>
-    <None Include="..\..\..\..\..\..\..\..\Program Files\Autodesk\FBX\FBX SDK\2018.1.1\lib\vs2015store\x86\debug\libfbxsdk.dll">
-      <Filter>Binaries</Filter>
-    </None>
     <None Include="Assets\monkey.fbx">
       <Filter>Assets</Filter>
     </None>
@@ -95,6 +86,15 @@
     </None>
     <None Include="Assets\colorcube.fbx">
       <Filter>Assets</Filter>
+    </None>
+    <None Include="libfbxsdk.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="libEGL.dll">
+      <Filter>Binaries</Filter>
+    </None>
+    <None Include="libGLESv2.dll">
+      <Filter>Binaries</Filter>
     </None>
   </ItemGroup>
 </Project>
